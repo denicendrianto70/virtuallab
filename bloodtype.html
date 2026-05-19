@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Lab Virtual – Uji Golongan Darah</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4f8;--surf:#ffffff;--surf2:#f8fafc;
+  --border:#dde3ec;--border2:#c5cfe0;
+  --acc:#dc2626;--acc2:#ef4444;--acc3:#b91c1c;
+  --text:#1e293b;--text2:#475569;--text3:#94a3b8;
+  --yellow:#d97706;--red:#dc2626;--green:#059669;
+  --h:56px;
+  --fbase:14px;
+}
+@media (max-width:768px){:root{--fbase:13px;--h:46px;}}
+@media (min-width:1200px){:root{--fbase:15px;}}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 10% 0%,rgba(220,38,38,0.06) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 50% at 90% 100%,rgba(220,38,38,0.05) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(148,163,184,0.08) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(148,163,184,0.08) 40px);
+}
+/* HEADER */
+header{
+  position:relative;z-index:10;height:var(--h);flex-shrink:0;
+  background:linear-gradient(135deg,#1a0505,#7f1d1d);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.12);
+  display:flex;align-items:center;padding:0 14px;gap:12px;
+  box-shadow:0 2px 10px rgba(127,29,29,0.45);
+}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.logo-icon{width:35px;height:35px;border-radius:6px;background:#ffffff;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.logo-text{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:#ffffff;line-height:1.1;}
+.logo-sub{font-size:9.5px;color:rgba(255,255,255,0.75);}
+nav{display:flex;gap:2px;flex:1;overflow-x:auto;}
+nav::-webkit-scrollbar{display:none;}
+.nb{position:relative;background:none;border:none;color:rgba(255,255,255,0.7);cursor:pointer;font-family:'Inter',sans-serif;font-size:clamp(12px,1.3vw,14px);font-weight:500;padding:0 13px;height:var(--h);white-space:nowrap;transition:color .2s;}
+.nb::after{content:'';position:absolute;bottom:0;left:10px;right:10px;height:2px;background:#fca5a5;transform:scaleX(0);transition:transform .2s;border-radius:2px 2px 0 0;}
+.nb:hover{color:rgba(255,255,255,0.95);}
+.nb.active{color:#fff;}
+.nb.active::after{transform:scaleX(1);}
+#menuToggle{display:none;background:none;border:none;cursor:pointer;padding:6px;color:#fff;flex-shrink:0;touch-action:manipulation;}
+#menuToggle svg{display:block;}
+@media(max-width:640px){
+  header{flex-wrap:nowrap;padding:0 10px;}
+  .logo-text{font-size:16px;}
+  .logo-sub{display:none;}
+  #menuToggle{display:flex;align-items:center;justify-content:center;margin-left:auto;}
+  nav{display:none;flex-direction:column;position:fixed;top:var(--h);right:0;left:0;z-index:999;background:linear-gradient(180deg,#1a0505,#7f1d1d);border-bottom:1px solid rgba(255,255,255,.15);box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:visible;gap:0;flex:none;}
+  nav.open{display:flex;}
+  .nb{height:52px;width:100%;text-align:left;padding:0 18px;border-bottom:1px solid rgba(255,255,255,.07);font-size:14px;display:flex;align-items:center;gap:10px;}
+  .nb::after{display:none;}
+  .nb.active{background:rgba(255,255,255,.08);}
+  .nb img{width:24px!important;height:24px!important;margin-right:0!important;}
+}
+#app{position:relative;z-index:1;flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.page{display:none;flex:1;overflow:hidden;}
+.page.active{display:flex;flex-direction:column;}
+@keyframes fu{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+.page.active{animation:fu .22s ease;}
+.scroll{flex:1;overflow-y:auto;padding:10px 14px 14px;}
+.scroll::-webkit-scrollbar{width:4px;}
+.scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* CARDS */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:7px;transition:border-color .2s,box-shadow .2s;box-shadow:0 1px 3px rgba(30,41,59,0.06);}
+.card:hover{border-color:var(--border2);box-shadow:0 3px 10px rgba(30,41,59,0.09);}
+.ch{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.ci{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.ci.b{background:rgba(220,38,38,.1);}
+.ci.y{background:rgba(217,119,6,.1);}
+.ci.g{background:rgba(5,150,105,.1);}
+.ci.r{background:rgba(220,38,38,.1);}
+.ci.p{background:rgba(124,58,237,.1);}
+.ct{font-family:'Space Grotesk',sans-serif;font-size:clamp(13px,1.5vw,15px);font-weight:700;color:var(--acc3);}
+.card p{font-size:clamp(12px,1.3vw,14px);line-height:1.7;color:var(--text2);margin-bottom:6px;}
+.card p:last-child{margin-bottom:0;}
+.card h4{font-size:clamp(10px,1.1vw,12px);font-weight:600;color:var(--acc);letter-spacing:.08em;text-transform:uppercase;margin:10px 0 5px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.olist{list-style:none;}
+.olist li{display:flex;align-items:flex-start;gap:7px;font-size:clamp(12px,1.3vw,14px);color:var(--text2);line-height:1.6;padding:4px 0;border-bottom:1px solid var(--border);}
+.olist li:last-child{border-bottom:none;}
+.olist li::before{content:'›';color:var(--acc);font-weight:700;font-size:15px;margin-top:-1px;}
+.chips{display:flex;gap:5px;margin:6px 0;flex-wrap:wrap;}
+.chip{border-radius:5px;padding:3px 8px;font-size:clamp(11px,1.2vw,13px);font-weight:500;}
+.chip-a{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);color:#991b1b;}
+.chip-b{background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.2);color:#1d4ed8;}
+.chip-ab{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:#6d28d9;}
+.chip-o{background:rgba(5,150,105,.08);border:1px solid rgba(5,150,105,.2);color:#047857;}
+.chip-pos{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);color:#991b1b;}
+.chip-neg{background:rgba(30,41,59,.08);border:1px solid rgba(30,41,59,.2);color:#334155;}
+.steps{display:flex;flex-direction:column;gap:5px;}
+.step{display:flex;gap:10px;align-items:flex-start;background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;transition:border-color .17s;}
+.step:hover{border-color:var(--acc2);background:#fff5f5;}
+.snum{min-width:20px;height:20px;border-radius:50%;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acc);flex-shrink:0;}
+.step p{font-size:clamp(12px,1.3vw,14px);color:var(--text2);line-height:1.6;margin:0;}
+.notebox{background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:8px 12px;margin-top:7px;}
+.notebox .nt{font-size:9.5px;font-weight:600;color:var(--yellow);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;}
+.notebox p{font-size:clamp(12px,1.2vw,13px);color:#92400e;line-height:1.6;margin:0;}
+.sep{display:flex;align-items:center;gap:8px;margin:8px 0 5px;}
+.sep span{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acc);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;font-weight:600;}
+.sep::before,.sep::after{content:'';flex:1;height:1px;background:var(--border);}
+/* QUIZ */
+.quiz-nav-header{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--surf);border:1px solid var(--border);border-radius:9px;margin-bottom:7px;flex-shrink:0;box-shadow:0 1px 3px rgba(30,41,59,0.05);}
+.qprog{display:flex;gap:3px;flex-wrap:wrap;}
+.qprog-dot{width:24px;height:24px;border-radius:5px;border:1px solid var(--border);background:var(--surf2);font-size:9.5px;font-weight:600;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .17s;}
+.qprog-dot.answered{border-color:var(--acc2);color:var(--acc);background:#fff5f5;}
+.qprog-dot.current{background:var(--acc);color:#fff;border-color:var(--acc);}
+.q-card{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:14px;flex:1;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(30,41,59,0.06);}
+.qnum{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--acc);letter-spacing:.1em;margin-bottom:5px;}
+.qtype-badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;margin-bottom:7px;letter-spacing:.04em;}
+.badge-mc{background:#fff5f5;border:1px solid #fecaca;color:#b91c1c;}
+.badge-tf{background:#fff5f5;border:1px solid #fca5a5;color:#991b1b;}
+.qtext{font-size:13px;color:var(--text);line-height:1.55;font-weight:500;margin-bottom:10px;}
+.opts{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.opt{display:flex;align-items:flex-start;gap:8px;background:var(--surf2);border:1px solid var(--border);border-radius:7px;padding:8px 11px;cursor:pointer;transition:all .16s;font-size:12px;color:var(--text2);}
+.opt:hover{border-color:var(--acc2);background:#fff5f5;color:var(--text);}
+.opt input{margin-top:1px;accent-color:var(--acc);cursor:pointer;}
+.opt.sel{border-color:var(--acc);background:#fff5f5;color:var(--acc3);}
+.opt.correct{background:#f0fdf4;border-color:#4ade80;color:#166534;}
+.opt.wrong{background:#fff1f2;border-color:#f87171;color:#b91c1c;}
+.qfb{margin-top:8px;padding:7px 10px;border-radius:6px;font-size:11.5px;display:none;}
+.qfb.on{display:block;}
+.qfb.ok{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+.qfb.bad{background:#fff1f2;color:#b91c1c;border:1px solid #fecdd3;}
+.quiz-foot{display:flex;align-items:center;gap:7px;padding-top:7px;flex-shrink:0;}
+.btn-qnav{padding:6px 14px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .17s;border:none;}
+.btn-prev{background:var(--surf2);border:1px solid var(--border);color:var(--text2);}
+.btn-prev:hover{border-color:var(--acc);color:var(--acc);background:#fff5f5;}
+.btn-next{background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;box-shadow:0 2px 8px rgba(220,38,38,.25);}
+.btn-next:hover{box-shadow:0 4px 14px rgba(220,38,38,.35);}
+.btn-submit-q{background:linear-gradient(135deg,#7f1d1d,#b91c1c);color:#fff;}
+.btn-reset-q{background:var(--surf2);border:1px solid var(--border);color:var(--text2);}
+.btn-reset-q:hover{border-color:var(--acc);color:var(--acc);background:#fff5f5;}
+.qcounter{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text3);}
+/* SCORE OVERLAY */
+.score-overlay{position:fixed;inset:0;background:rgba(127,29,29,.55);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);}
+.score-overlay.on{display:flex;}
+.score-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:32px 44px;text-align:center;box-shadow:0 20px 60px rgba(30,41,59,.18);animation:fu .28s ease;min-width:280px;}
+.score-big{font-family:'Space Grotesk',sans-serif;font-size:68px;font-weight:700;color:var(--acc);line-height:1;}
+.score-pct{font-size:20px;color:var(--text3);margin-top:2px;}
+.score-sub{font-size:12.5px;color:var(--text2);margin:8px 0 4px;}
+.score-grade{font-size:15px;font-weight:600;margin-top:8px;}
+.score-actions{display:flex;gap:8px;justify-content:center;margin-top:18px;}
+.btn-score{padding:8px 20px;border-radius:7px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:all .17s;}
+.btn-review{background:var(--surf2);border:1px solid var(--border);color:var(--text2);}
+.btn-review:hover{border-color:var(--acc);color:var(--acc);background:#fff5f5;}
+.btn-ulangi{background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;}
+.btn-ulangi:hover{box-shadow:0 4px 14px rgba(220,38,38,.35);}
+/* LOADING SCREEN */
+#loadScreen{
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(135deg,#1a0505 0%,#7f1d1d 50%,#dc2626 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;transition:opacity .6s ease;
+}
+#loadScreen::before{content:'';position:absolute;inset:0;background-image:url('https://denicendrianto41.github.io/bg_lab.png');background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0;}
+#loadScreen::after{content:'';position:absolute;inset:0;background:rgba(90,10,10,0.62);z-index:1;}
+#loadScreen > *{position:relative;z-index:2;}
+#loadScreen.hide{opacity:0;pointer-events:none;}
+.load-logo{width:clamp(60px,8vw,90px);margin-bottom:16px;}
+.load-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(18px,2.5vw,28px);font-weight:800;color:#fff;text-align:center;margin-bottom:4px;}
+.load-sub{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,12px);color:#fca5a5;letter-spacing:.15em;text-transform:uppercase;text-align:center;margin-bottom:28px;}
+.load-bar-wrap{width:clamp(220px,28vw,340px);height:6px;background:rgba(255,255,255,.15);border-radius:6px;overflow:hidden;margin-bottom:8px;position:relative;}
+.load-bar-slide{height:100%;width:0%;background:linear-gradient(90deg,#f87171,#fca5a5,#ef4444);border-radius:6px;transition:width .1s linear;}
+.load-percent{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.4vw,15px);color:#fff;font-weight:700;margin-bottom:14px;text-align:center;letter-spacing:.05em;}
+.load-status{font-size:clamp(11px,1.1vw,12px);color:#fecaca;font-family:'Inter',sans-serif;margin-bottom:32px;min-height:16px;text-align:center;}
+#btnMulaiPraktikum{
+  display:none;
+  background:linear-gradient(135deg,#991b1b,#dc2626);
+  color:#fff;border:none;border-radius:10px;
+  padding:10px 28px;
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1.3vw,14px);font-weight:700;
+  cursor:pointer;letter-spacing:.03em;
+  box-shadow:0 4px 18px rgba(220,38,38,.4);
+  animation:btnPop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+  transition:transform .18s, box-shadow .18s;
+}
+#btnMulaiPraktikum:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 8px 28px rgba(220,38,38,.5);}
+@keyframes btnPop{from{opacity:0;transform:scale(0.7);}to{opacity:1;transform:scale(1);}}
+@keyframes stepZoom{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+.step-box-zoom{animation:stepZoom .35s cubic-bezier(.34,1.56,.64,1);}
+.disc-area{width:100%;border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-family:'Inter',sans-serif;font-size:12px;color:var(--text);background:var(--surf2);resize:vertical;outline:none;transition:border-color .17s;line-height:1.6;margin-top:6px;}
+.disc-area:focus{border-color:var(--acc);box-shadow:0 0 0 2px rgba(220,38,38,.1);}
+/* DRAG & DROP */
+.drag-card{background:#fff;border:1.5px dashed var(--border);border-radius:9px;padding:9px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:grab;touch-action:none;user-select:none;transition:border-color .15s,transform .12s,box-shadow .15s;}
+.drag-card:hover{border-color:var(--acc2);box-shadow:0 4px 14px rgba(220,38,38,.12);}
+.drag-card.alat{background:#fff5f5;border:1.5px dashed #fca5a5;}
+.drag-card.alat:hover{border-color:var(--acc);}
+.drag-card.bahan{background:#fff0f0;border:1.5px dashed #fca5a5;}
+.drag-card.bahan:hover{border-color:var(--acc);}
+.drag-card.dragging{opacity:.3;transform:scale(.95);filter:grayscale(.5);}
+.drag-card.placed{opacity:.45;cursor:not-allowed;filter:grayscale(.4);}
+.drag-icon{margin-bottom:3px;display:flex;align-items:center;justify-content:center;line-height:1;}
+.drag-icon img{width:30px;height:30px;object-fit:contain;vertical-align:middle;display:inline-block;}
+.drag-name{font-size:11px;font-weight:600;color:var(--acc3);line-height:1.3;margin-bottom:1px;}
+.drag-card.bahan .drag-name{color:#7f1d1d;}
+.drag-sub{font-size:9.5px;color:var(--text3);}
+.drag-card.touch-grabbing{transform:scale(1.06);box-shadow:0 8px 24px rgba(220,38,38,.22);border-color:var(--acc2);z-index:10;}
+.drop-zone{border:2px dashed var(--border2);border-radius:10px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;transition:background .2s, border-color .2s;position:relative;touch-action:none;min-height:110px;}
+.drop-zone#dropAlat{border-color:#fca5a5;background:#fff5f5;}
+.drop-zone.bahan-zone{border-color:#fca5a5;background:#fff8f8;}
+.drop-zone.drag-over-ok{background:#fee2e2;border-color:#dc2626;}
+.drop-zone.bahan-zone.drag-over-ok{background:#fee2e2;border-color:#991b1b;}
+.drop-zone.drag-over-wrong{background:#fff1f2;border-color:#f87171;}
+.drop-hint{width:100%;text-align:center;font-size:12px;color:#fca5a5;padding:8px 0;pointer-events:none;}
+.drop-zone.bahan-zone .drop-hint{color:#fca5a5;}
+.drop-card{background:#fff;border:1.5px solid #fca5a5;border-radius:8px;padding:7px 9px;display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--text);position:relative;}
+.drop-card.bahan-card{border-color:#fecaca;}
+.drop-card.wrong-card{border-color:#fca5a5;background:#fff1f2;color:#991b1b;}
+.drop-card-icon{font-size:18px;flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+.drop-card-icon img{max-height:22px;max-width:22px;object-fit:contain;}
+.drop-card-remove{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 2px;line-height:1;transition:color .15s;}
+.drop-card-remove:hover{color:#dc2626;}
+@keyframes shakeWrong{0%{transform:translateX(0);}15%{transform:translateX(-8px);}30%{transform:translateX(8px);}45%{transform:translateX(-6px);}60%{transform:translateX(6px);}75%{transform:translateX(-3px);}90%{transform:translateX(3px);}100%{transform:translateX(0);}}
+@keyframes bounceRight{0%{transform:scale(1);}30%{transform:scale(1.12);}55%{transform:scale(.95);}75%{transform:scale(1.05);}100%{transform:scale(1);}}
+.anim-correct{animation:bounceRight .4s cubic-bezier(.34,1.56,.64,1);}
+.anim-wrong{animation:shakeWrong .5s ease;}
+/* CELEBRATION */
+.celeb-overlay{position:fixed;inset:0;background:rgba(127,29,29,.45);display:none;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(6px);pointer-events:none;}
+.celeb-box{background:#fff;border-radius:18px;padding:30px 36px;text-align:center;box-shadow:0 20px 60px rgba(127,29,29,.25);min-width:280px;max-width:340px;transform:scale(.5) translateY(60px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .28s ease;position:relative;overflow:hidden;}
+.celeb-stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+@keyframes starFloat{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(-120px) rotate(360deg);opacity:0;}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+/* SIMULASI INLINE */
+.sim-well{background:#fff;border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:7px;}
+.slide-label{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.slide-circles{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;}
+.slide-circle-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.slide-circle{width:80px;height:80px;border-radius:50%;border:3px solid #e2e8f0;position:relative;display:flex;align-items:center;justify-content:center;transition:all .4s ease;overflow:hidden;background:#f8fafc;}
+.slide-circle .serum-label{font-size:9px;font-weight:700;color:var(--text3);text-align:center;z-index:2;position:relative;}
+.clump{position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .5s ease;}
+.clump-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .5s ease;}
+.result-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block;}
+.result-agglutinated{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
+.result-none{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+/* BLOOD TYPE RESULT CARD */
+.blood-result-card{background:linear-gradient(135deg,#fff5f5,#fff);border:2px solid var(--acc);border-radius:14px;padding:16px 20px;text-align:center;margin-top:10px;}
+.blood-type-big{font-family:'Space Grotesk',sans-serif;font-size:42px;font-weight:800;}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loadScreen">
+  <img class="load-logo" src="https://denicendrianto41.github.io/logo_vlab.png" alt="Logo">
+  <div class="load-title">Lab Maya Biologi</div>
+  <div class="load-sub">Uji Golongan Darah</div>
+  <div class="load-bar-wrap"><div class="load-bar-slide" id="loadBar"></div></div>
+  <div class="load-percent" id="loadPercent">0%</div>
+  <div class="load-status" id="loadStatus">Memuat laboratorium virtual…</div>
+  <button id="btnMulaiPraktikum" onclick="startPraktikum()">Mulai Praktikum</button>
+</div>
+
+<script>
+(function(){
+  const bar=document.getElementById('loadBar');
+  const pct=document.getElementById('loadPercent');
+  const status=document.getElementById('loadStatus');
+  let current=0;
+  const total=3000,step=20,inc=100/(total/step);
+  const messages=['Memuat laboratorium virtual…','Menyiapkan serum Anti-A…','Menyiapkan serum Anti-B…','Memuat data golongan darah…','Menyiapkan slide kaca…'];
+  let mi=0;
+  const iv=setInterval(()=>{
+    current=Math.min(100,current+inc);
+    const v=Math.floor(current);
+    bar.style.width=v+'%'; pct.textContent=v+'%';
+    if(Math.floor(current)%20===0&&mi<messages.length) status.textContent=messages[mi++];
+    if(current>=100){
+      clearInterval(iv); pct.textContent='100%';
+      status.textContent='✅ Laboratorium siap digunakan!';
+      document.getElementById('btnMulaiPraktikum').style.display='block';
+    }
+  },step);
+})();
+function startPraktikum(){
+  const sfx=new Audio('https://denicendrianto41.github.io/tring.wav');
+  sfx.play().catch(()=>{});
+  const ls=document.getElementById('loadScreen');
+  ls.classList.add('hide');
+  setTimeout(()=>{
+    ls.style.display='none';
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+    document.getElementById('page-tujuan').classList.add('active');
+    const btn=document.querySelector('.nb[onclick*="tujuan"]');
+    if(btn) btn.classList.add('active');
+  },650);
+}
+</script>
+
+<audio id="clickSfx" src="https://denicendrianto41.github.io/jump.wav" preload="auto"></audio>
+<script>
+  document.addEventListener('click',function(e){
+    const el=e.target.closest('button, .nb, .btn, select, input[type="range"]');
+    if(!el||el.id==='btnMulaiPraktikum') return;
+    const sfx=document.getElementById('clickSfx');
+    if(!sfx) return;
+    sfx.currentTime=0; sfx.play().catch(()=>{});
+  });
+</script>
+
+<header style="justify-content:space-between;">
+  <div class="logo">
+    <div class="logo-icon" style="background:#fff;overflow:hidden;padding:2px;">
+      <img src="https://denicendrianto41.github.io/logo_vlab.png" alt="Logo" style="width:100%;height:100%;object-fit:contain;display:block;">
+    </div>
+    <div>
+      <div class="logo-text">Lab Maya Biologi</div>
+      <div class="logo-sub">Uji Golongan Darah</div>
+    </div>
+  </div>
+  <button id="menuToggle" onclick="toggleNav()" aria-label="Menu">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+  <nav id="mainNav" style="margin-left:0;justify-content:flex-end;">
+    <button class="nb active" onclick="show('tujuan',this);closeNav()">
+      <img src="https://denicendrianto41.github.io/tujuan.png" alt="" style="width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-right:6px;">Tujuan</button>
+    <button class="nb" onclick="show('teori',this);closeNav()">
+      <img src="https://denicendrianto41.github.io/teori.png" alt="" style="width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-right:6px;">Teori</button>
+    <button class="nb" onclick="show('alatbahan',this);closeNav()">
+      <img src="https://denicendrianto41.github.io/alat-bahan.png" alt="" style="width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-right:6px;">Alat &amp; Bahan</button>
+    <button class="nb" onclick="show('prosedur',this);closeNav()">
+      <img src="https://denicendrianto41.github.io/prosedur.png" alt="" style="width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-right:6px;">Prosedur</button>
+    <button class="nb" onclick="show('simulasi',this);closeNav()">
+      <img src="https://denicendrianto41.github.io/simulasi.png" alt="" style="width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-right:6px;">Simulasi</button>
+    <button class="nb" onclick="show('evaluasi',this);closeNav()">
+      <img src="https://denicendrianto41.github.io/diskusi.png" alt="" style="width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-right:6px;">Diskusi</button>
+  </nav>
+</header>
+
+<div id="app">
+
+<!-- ===== TUJUAN ===== -->
+<div id="page-tujuan" class="page">
+  <div class="scroll" style="padding:14px 16px 20px;">
+    <div style="background:linear-gradient(135deg,#1a0505 0%,#7f1d1d 45%,#dc2626 100%);border-radius:16px;padding:22px 24px 18px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(127,29,29,0.28);">
+      <div style="position:absolute;top:-30px;right:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,0.05);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:-20px;left:-20px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"></div>
+      <div style="position:relative;z-index:1;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(14px,1.8vw,20px);font-weight:800;color:#fff;letter-spacing:-0.02em;line-height:1.2;">Lab Virtual – Uji Golongan Darah ABO &amp; Rhesus</div>
+        <div style="width:48px;height:3px;background:linear-gradient(90deg,#fca5a5,#fecaca);border-radius:2px;margin:10px 0;"></div>
+        <p style="font-size:clamp(11px,1.2vw,13px);color:rgba(254,202,202,0.90);line-height:1.7;margin:0;max-width:620px;">
+          Selamat datang di laboratorium virtual. Pelajari cara menentukan <strong style="color:#fca5a5;">golongan darah sistem ABO dan Rhesus</strong> secara interaktif — dari teori, simulasi uji aglutinasi, hingga diskusi hasil percobaan.
+        </p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="background:#fff;border:1px solid #dde3ec;border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(30,41,59,0.07);transition:box-shadow .2s,transform .2s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(220,38,38,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(30,41,59,0.07)';this.style.transform=''">
+        <div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,#dc2626,#f87171);border-radius:14px 14px 0 0;"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;margin-top:4px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#fee2e2,#fff5f5);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🎯</div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#dc2626;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">Tujuan</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1.3vw,14px);font-weight:700;color:#1e293b;">Pembelajaran</div>
+          </div>
+        </div>
+        <p style="font-size:clamp(11px,1.2vw,13px);color:#475569;line-height:1.7;margin:0;">Mendeskripsikan <strong style="color:#b91c1c;">sistem golongan darah ABO dan Rhesus</strong> pada manusia serta menentukan golongan darah melalui uji serologis.</p>
+      </div>
+      <div style="background:#fff;border:1px solid #dde3ec;border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(30,41,59,0.07);transition:box-shadow .2s,transform .2s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(217,119,6,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(30,41,59,0.07)';this.style.transform=''">
+        <div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,#d97706,#fbbf24);border-radius:14px 14px 0 0;"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;margin-top:4px;">
+          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#fef3c7,#fffbeb);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🔬</div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#d97706;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">Tujuan</div>
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1.3vw,14px);font-weight:700;color:#1e293b;">Percobaan</div>
+          </div>
+        </div>
+        <p style="font-size:clamp(11px,1.2vw,13px);color:#475569;line-height:1.7;margin:0;">Membuktikan reaksi <strong style="color:#b45309;">aglutinasi</strong> antara antigen pada eritrosit dengan antibodi dalam serum Anti-A, Anti-B, dan Anti-D (Rhesus).</p>
+      </div>
+    </div>
+
+    <div style="background:#fff;border:1px solid #dde3ec;border-radius:14px;padding:16px 18px;box-shadow:0 2px 12px rgba(30,41,59,0.07);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#fef3c7,#fffbeb);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏆</div>
+        <div>
+          <div style="font-size:9px;font-weight:700;color:#d97706;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">Indikator Pencapaian</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(12px,1.3vw,14px);font-weight:700;color:#1e293b;">Hasil Belajar yang Diharapkan</div>
+        </div>
+      </div>
+      <p style="font-size:clamp(11px,1.2vw,12.5px);color:#94a3b8;margin-bottom:12px;margin-top:-6px;">Setelah menyelesaikan kegiatan ini, peserta didik diharapkan mampu:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;" onmouseover="this.style.borderColor='#fca5a5'" onmouseout="this.style.borderColor='#e2e8f0'">
+          <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#fee2e2,#fecaca);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#b91c1c;font-family:'JetBrains Mono',monospace;">1</div>
+          <span style="font-size:clamp(11px,1.2vw,13px);color:#334155;line-height:1.6;">Menjelaskan dasar genetik <strong style="color:#b91c1c;">sistem ABO</strong> dan tipe antigen–antibodi yang terlibat</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;" onmouseover="this.style.borderColor='#93c5fd'" onmouseout="this.style.borderColor='#e2e8f0'">
+          <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#1d4ed8;font-family:'JetBrains Mono',monospace;">2</div>
+          <span style="font-size:clamp(11px,1.2vw,13px);color:#334155;line-height:1.6;">Membedakan <strong style="color:#1d4ed8;">Rhesus positif dan negatif</strong> berdasarkan ada/tidaknya antigen D</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;" onmouseover="this.style.borderColor='#c4b5fd'" onmouseout="this.style.borderColor='#e2e8f0'">
+          <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#7c3aed;font-family:'JetBrains Mono',monospace;">3</div>
+          <span style="font-size:clamp(11px,1.2vw,13px);color:#334155;line-height:1.6;">Menginterpretasikan hasil <strong style="color:#7c3aed;">reaksi aglutinasi</strong> pada uji golongan darah</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;" onmouseover="this.style.borderColor='#6ee7b7'" onmouseout="this.style.borderColor='#e2e8f0'">
+          <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:800;color:#059669;font-family:'JetBrains Mono',monospace;">4</div>
+          <span style="font-size:clamp(11px,1.2vw,13px);color:#334155;line-height:1.6;">Menjelaskan pentingnya <strong style="color:#059669;">kompatibilitas golongan darah</strong> dalam transfusi dan kehamilan</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TEORI ===== -->
+<div id="page-teori" class="page">
+  <div class="scroll" style="overflow-y:auto;padding:10px 14px 14px;">
+    <div style="background:linear-gradient(135deg,#1e293b 0%,#1a0505 60%,#dc2626 100%);border-radius:14px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:center;gap:14px;box-shadow:0 6px 24px rgba(127,29,29,0.22);position:relative;overflow:hidden;flex-shrink:0;">
+      <div style="position:absolute;right:-20px;top:-20px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,0.04);pointer-events:none;"></div>
+      <div style="width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid rgba(255,255,255,0.18);">📚</div>
+      <div style="position:relative;z-index:1;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(14px,1.8vw,19px);font-weight:800;color:#fff;">Dasar Teori</div>
+        <div style="font-size:clamp(10px,1.1vw,11.5px);color:rgba(252,165,165,0.85);margin-top:2px;">Golongan Darah · <em>Sistem ABO &amp; Rhesus</em></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><div class="ci r">🩸</div><div class="ct">Sistem Golongan Darah ABO</div></div>
+        <p>Golongan darah ditentukan oleh <strong>antigen (aglutinogen)</strong> pada permukaan eritrosit dan <strong>antibodi (aglutinin)</strong> dalam plasma darah. Sistem ABO ditemukan oleh Karl Landsteiner (1901).</p>
+        <h4>Antigen &amp; Antibodi Sistem ABO</h4>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#fff5f5;">
+              <th style="padding:5px 8px;border:1px solid #fecaca;color:#b91c1c;text-align:left;">Golongan</th>
+              <th style="padding:5px 8px;border:1px solid #fecaca;color:#b91c1c;text-align:left;">Antigen (Eritrosit)</th>
+              <th style="padding:5px 8px;border:1px solid #fecaca;color:#b91c1c;text-align:left;">Antibodi (Plasma)</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:4px 8px;border:1px solid #fee2e2;"><strong style="color:#dc2626;">A</strong></td><td style="padding:4px 8px;border:1px solid #fee2e2;">Antigen A</td><td style="padding:4px 8px;border:1px solid #fee2e2;">Anti-B</td></tr>
+              <tr style="background:#f8fafc;"><td style="padding:4px 8px;border:1px solid #fee2e2;"><strong style="color:#1d4ed8;">B</strong></td><td style="padding:4px 8px;border:1px solid #fee2e2;">Antigen B</td><td style="padding:4px 8px;border:1px solid #fee2e2;">Anti-A</td></tr>
+              <tr><td style="padding:4px 8px;border:1px solid #fee2e2;"><strong style="color:#7c3aed;">AB</strong></td><td style="padding:4px 8px;border:1px solid #fee2e2;">Antigen A &amp; B</td><td style="padding:4px 8px;border:1px solid #fee2e2;">Tidak ada</td></tr>
+              <tr style="background:#f8fafc;"><td style="padding:4px 8px;border:1px solid #fee2e2;"><strong style="color:#059669;">O</strong></td><td style="padding:4px 8px;border:1px solid #fee2e2;">Tidak ada</td><td style="padding:4px 8px;border:1px solid #fee2e2;">Anti-A &amp; Anti-B</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><div class="ci r">🧬</div><div class="ct">Sistem Rhesus (Rh)</div></div>
+        <p>Sistem Rhesus didasarkan pada ada/tidaknya <strong>antigen D (faktor Rh)</strong> pada permukaan eritrosit. Ditemukan dari penelitian pada kera Rhesus (<em>Macaca mulatta</em>).</p>
+        <h4>Rhesus Positif &amp; Negatif</h4>
+        <ul class="olist">
+          <li><strong>Rh+ (Positif):</strong> Memiliki antigen D di eritrosit. Sekitar 85% populasi.</li>
+          <li><strong>Rh− (Negatif):</strong> Tidak memiliki antigen D. Sekitar 15% populasi.</li>
+          <li><strong>Uji:</strong> Menggunakan serum Anti-D. Aglutinasi → Rh+, tidak aglutinasi → Rh−.</li>
+          <li><strong>Pentingnya:</strong> Eritroblastosis fetalis terjadi jika ibu Rh− mengandung bayi Rh+.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><div class="ci r">⚗️</div><div class="ct">Reaksi Aglutinasi</div></div>
+        <p><strong>Aglutinasi</strong> adalah penggumpalan eritrosit akibat reaksi antigen–antibodi. Antigen pada eritrosit berikatan dengan antibodi spesifik dalam serum, membentuk agregat yang terlihat sebagai gumpalan.</p>
+        <div class="chips">
+          <span class="chip chip-a">Antigen A + Anti-A → Aglutinasi</span>
+          <span class="chip chip-b">Antigen B + Anti-B → Aglutinasi</span>
+          <span class="chip chip-o">Tidak ada antigen → Tidak aglutinasi</span>
+        </div>
+        <div class="notebox">
+          <div class="nt">⚠️ Catatan</div>
+          <p>Golongan O disebut <em>donor universal</em> karena eritrositnya tidak memiliki antigen sehingga tidak akan diaglutinasi oleh antibodi manapun.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><div class="ci r">🩺</div><div class="ct">Genetika Golongan Darah ABO</div></div>
+        <p>Golongan darah ABO dikendalikan oleh gen <strong>I</strong> dengan tiga alel: <em>I<sup>A</sup></em>, <em>I<sup>B</sup></em>, dan <em>i</em>. Alel I<sup>A</sup> dan I<sup>B</sup> bersifat kodominan, sedangkan i bersifat resesif.</p>
+        <h4>Genotip &amp; Fenotip</h4>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#fff5f5;">
+              <th style="padding:4px 7px;border:1px solid #fecaca;color:#b91c1c;">Golongan</th>
+              <th style="padding:4px 7px;border:1px solid #fecaca;color:#b91c1c;">Genotip</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:4px 7px;border:1px solid #fee2e2;"><strong>A</strong></td><td style="padding:4px 7px;border:1px solid #fee2e2;">I<sup>A</sup>I<sup>A</sup> atau I<sup>A</sup>i</td></tr>
+              <tr style="background:#f8fafc;"><td style="padding:4px 7px;border:1px solid #fee2e2;"><strong>B</strong></td><td style="padding:4px 7px;border:1px solid #fee2e2;">I<sup>B</sup>I<sup>B</sup> atau I<sup>B</sup>i</td></tr>
+              <tr><td style="padding:4px 7px;border:1px solid #fee2e2;"><strong>AB</strong></td><td style="padding:4px 7px;border:1px solid #fee2e2;">I<sup>A</sup>I<sup>B</sup></td></tr>
+              <tr style="background:#f8fafc;"><td style="padding:4px 7px;border:1px solid #fee2e2;"><strong>O</strong></td><td style="padding:4px 7px;border:1px solid #fee2e2;">ii</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ch"><div class="ci r">💉</div><div class="ct">Kompatibilitas Transfusi Darah</div></div>
+      <p>Dalam transfusi darah, perlu diperhatikan kesesuaian golongan darah donor dan resipien agar tidak terjadi reaksi aglutinasi yang berbahaya.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px;">
+        <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#dc2626;">A</div>
+          <div style="font-size:9px;color:#666;margin-top:2px;">Donor ke: A, AB</div>
+          <div style="font-size:9px;color:#666;">Terima dari: A, O</div>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#1d4ed8;">B</div>
+          <div style="font-size:9px;color:#666;margin-top:2px;">Donor ke: B, AB</div>
+          <div style="font-size:9px;color:#666;">Terima dari: B, O</div>
+        </div>
+        <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#7c3aed;">AB</div>
+          <div style="font-size:9px;color:#666;margin-top:2px;">Donor ke: AB</div>
+          <div style="font-size:9px;color:#666;">Terima dari: Semua</div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#059669;">O</div>
+          <div style="font-size:9px;color:#666;margin-top:2px;">Donor ke: Semua</div>
+          <div style="font-size:9px;color:#666;">Terima dari: O</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ALAT & BAHAN ===== -->
+<div id="page-alatbahan" class="page">
+<style>
+.drag-card{touch-action:none;-webkit-user-select:none;user-select:none;}
+#celebOverlay2{position:fixed;inset:0;background:rgba(127,29,29,.45);display:none;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(6px);pointer-events:none;}
+#celebOverlay2.on{display:flex;pointer-events:auto;}
+#celebBox2{background:#fff;border-radius:18px;padding:28px 36px;text-align:center;box-shadow:0 20px 60px rgba(127,29,29,.25);min-width:280px;max-width:340px;transform:scale(.5) translateY(60px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .28s ease;position:relative;overflow:hidden;}
+#confettiCanvas2{position:fixed;inset:0;pointer-events:none;z-index:499;}
+@keyframes starFloat2{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(-120px) rotate(360deg);opacity:0;}}
+</style>
+<canvas id="confettiCanvas2" style="pointer-events:none;"></canvas>
+<div id="celebOverlay2">
+  <div id="celebBox2">
+    <div id="celebStars2" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+    <div id="celebBadge2" style="font-size:52px;opacity:0;transform:scale(.6);transition:all .35s cubic-bezier(.34,1.56,.64,1);">🏆</div>
+    <div id="celebTitle2" style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;color:#dc2626;margin:8px 0 4px;opacity:0;transform:translateY(10px);transition:all .3s ease .1s;">Sempurna!</div>
+    <div id="celebSub2" style="font-size:13px;color:#475569;opacity:0;transform:translateY(8px);transition:all .3s ease .15s;">Semua alat &amp; bahan ditempatkan dengan benar! 🩸</div>
+    <div id="celebStats2" style="display:flex;gap:12px;justify-content:center;margin:14px 0;opacity:0;transition:opacity .3s ease .2s;">
+      <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;text-align:center;"><div style="font-size:22px;font-weight:800;color:#dc2626;">✓</div><div style="font-size:9px;color:#666;">Alat Benar</div></div>
+      <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;text-align:center;"><div style="font-size:22px;font-weight:800;color:#dc2626;">✓</div><div style="font-size:9px;color:#666;">Bahan Benar</div></div>
+    </div>
+    <button onclick="closeCelebration2()" style="background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;border:none;border-radius:8px;padding:8px 22px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">Lanjutkan →</button>
+  </div>
+</div>
+<div id="dragPopup" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:600;pointer-events:none;">
+  <div id="dragPopupBox" style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 22px;max-width:280px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.12);transform:scale(.7);opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;">
+    <div id="dragPopupIcon" style="font-size:32px;margin-bottom:6px;"></div>
+    <div id="dragPopupTitle" style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-bottom:5px;"></div>
+    <div id="dragPopupMsg" style="font-size:11.5px;color:var(--text2);line-height:1.6;"></div>
+    <button onclick="closeDragPopup()" style="margin-top:10px;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:5px 16px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;">OK</button>
+  </div>
+</div>
+  <div class="scroll" style="overflow-y:auto;padding:8px 12px 12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;height:calc(100% - 0px);">
+      <!-- Source cards -->
+      <div class="card" style="margin-bottom:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;">
+        <div class="ch"><div class="ci r">🧰</div><div class="ct">Sumber Alat &amp; Bahan</div></div>
+        <p style="font-size:11px;color:var(--text3);margin-bottom:4px;">Seret item ke zona yang sesuai →</p>
+        <div style="font-size:10px;font-weight:700;color:var(--acc3);letter-spacing:.06em;text-transform:uppercase;margin:4px 0 4px;">ALAT</div>
+        <div id="sourceAlat" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;">
+          <div class="drag-card alat" draggable="true" data-id="slide" data-type="alat">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/tabung_reaksi.png" onerror="this.style.display='none';this.parentElement.textContent='🔬'"></div>
+            <div class="drag-name">Slide Kaca</div><div class="drag-sub">Object glass</div>
+          </div>
+          <div class="drag-card alat" draggable="true" data-id="pipet" data-type="alat">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/pipet.png" onerror="this.style.display='none';this.parentElement.textContent='💉'"></div>
+            <div class="drag-name">Pipet Tetes</div><div class="drag-sub">3 buah</div>
+          </div>
+          <div class="drag-card alat" draggable="true" data-id="tusuk" data-type="alat">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/korek.png" onerror="this.style.display='none';this.parentElement.textContent='📌'"></div>
+            <div class="drag-name">Lancet/Jarum</div><div class="drag-sub">Steril</div>
+          </div>
+          <div class="drag-card alat" draggable="true" data-id="mikroskop" data-type="alat">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/tabung_reaksi.png" onerror="this.style.display='none';this.parentElement.textContent='🔭'"></div>
+            <div class="drag-name">Mikroskop</div><div class="drag-sub">Opsional</div>
+          </div>
+          <div class="drag-card bahan" draggable="true" data-id="cotton" data-type="alat">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/air.png" onerror="this.style.display='none';this.parentElement.textContent='🩹'"></div>
+            <div class="drag-name">Kapas &amp; Alkohol</div><div class="drag-sub">70% isopropil</div>
+          </div>
+        </div>
+        <div style="font-size:10px;font-weight:700;color:var(--acc3);letter-spacing:.06em;text-transform:uppercase;margin:8px 0 4px;">BAHAN</div>
+        <div id="sourceBahan" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;">
+          <div class="drag-card bahan" draggable="true" data-id="antia" data-type="bahan">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/hcl.png" onerror="this.style.display='none';this.parentElement.textContent='🔴'"></div>
+            <div class="drag-name">Serum Anti-A</div><div class="drag-sub">Biru/kuning</div>
+          </div>
+          <div class="drag-card bahan" draggable="true" data-id="antib" data-type="bahan">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/naoh.png" onerror="this.style.display='none';this.parentElement.textContent='🔵'"></div>
+            <div class="drag-name">Serum Anti-B</div><div class="drag-sub">Kuning/biru</div>
+          </div>
+          <div class="drag-card bahan" draggable="true" data-id="antid" data-type="bahan">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/h2o2.png" onerror="this.style.display='none';this.parentElement.textContent='⬜'"></div>
+            <div class="drag-name">Serum Anti-D</div><div class="drag-sub">Faktor Rh</div>
+          </div>
+          <div class="drag-card bahan" draggable="true" data-id="darah" data-type="bahan">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/hati.png" onerror="this.style.display='none';this.parentElement.textContent='🩸'"></div>
+            <div class="drag-name">Sampel Darah</div><div class="drag-sub">Dari jari</div>
+          </div>
+          <div class="drag-card bahan" draggable="true" data-id="saline" data-type="bahan">
+            <div class="drag-icon"><img src="https://denicendrianto41.github.io/air.png" onerror="this.style.display='none';this.parentElement.textContent='💧'"></div>
+            <div class="drag-name">Larutan Saline</div><div class="drag-sub">NaCl 0,9%</div>
+          </div>
+        </div>
+        <div id="catatanMeja" style="display:none;background:#fff5f5;border:1px solid #fecaca;border-radius:7px;padding:8px 11px;margin-top:4px;">
+          <div style="font-size:9px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">📋 Catatan Meja</div>
+          <div id="catatanText" style="font-size:11px;color:#7f1d1d;line-height:1.6;"></div>
+        </div>
+      </div>
+      <!-- Drop zones -->
+      <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;">
+        <div class="card" style="margin-bottom:0;flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div class="ch"><div class="ci r">✅</div><div class="ct">Zona Penempatan</div></div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#b91c1c;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;">ZONA ALAT</div>
+            <div class="drop-zone" id="dropAlat" data-accept="alat">
+              <div class="drop-hint">← Drag alat ke sini</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#991b1b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;">ZONA BAHAN</div>
+            <div class="drop-zone bahan-zone" id="dropBahan" data-accept="bahan">
+              <div class="drop-hint">← Drag bahan ke sini</div>
+            </div>
+          </div>
+          <button onclick="resetMeja()" style="align-self:flex-end;background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;color:var(--text2);">↺ Reset Meja</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const NOTES = {
+    slide: 'Slide kaca harus bersih dan bebas lemak. Beri label A, B, D di ujung slide untuk tiap tetes serum.',
+    pipet: 'Gunakan pipet tetes terpisah untuk masing-masing serum agar tidak terjadi kontaminasi silang.',
+    tusuk: 'Lancet steril digunakan sekali pakai untuk mengambil sampel darah dari ujung jari.',
+    mikroskop: 'Mikroskop digunakan untuk mengamati aglutinasi secara mikroskopis jika reaksi tidak jelas secara kasat mata.',
+    cotton: 'Bersihkan ujung jari dengan kapas alkohol 70% sebelum penusukan untuk mencegah infeksi.',
+    antia: 'Serum Anti-A mengandung antibodi Anti-A yang akan bereaksi (aglutinasi) jika sampel mengandung antigen A.',
+    antib: 'Serum Anti-B mengandung antibodi Anti-B yang akan bereaksi (aglutinasi) jika sampel mengandung antigen B.',
+    antid: 'Serum Anti-D (Anti-Rhesus) menentukan faktor Rhesus. Aglutinasi = Rh+, tidak aglutinasi = Rh−.',
+    darah: 'Sampel darah segar diambil dari ujung jari. Teteskan satu tetes pada masing-masing area serum di slide.',
+    saline: 'Larutan NaCl 0,9% digunakan untuk mengencerkan sampel jika diperlukan atau sebagai kontrol negatif.',
+  };
+
+  let dragId = null, dragType = null;
+  let touchClone = null, touchCard = null;
+  let popupTimer = null;
+
+  function playSound(id) {
+    try { const a = document.getElementById(id); if(a){ a.currentTime = 0; a.play().catch(()=>{}); } } catch(e){}
+  }
+
+  function showPopup(icon, title, msg, type) {
+    const overlay = document.getElementById('dragPopup');
+    const box = document.getElementById('dragPopupBox');
+    const accent = type === 'ok' ? '#059669' : '#dc2626';
+    document.getElementById('dragPopupIcon').textContent = icon;
+    document.getElementById('dragPopupTitle').textContent = title;
+    document.getElementById('dragPopupTitle').style.color = accent;
+    document.getElementById('dragPopupMsg').textContent = msg;
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => { box.style.transform = 'scale(1)'; box.style.opacity = '1'; }));
+    clearTimeout(popupTimer);
+    popupTimer = setTimeout(closeDragPopup, 2800);
+  }
+  window.closeDragPopup = function() {
+    clearTimeout(popupTimer);
+    const overlay = document.getElementById('dragPopup');
+    const box = document.getElementById('dragPopupBox');
+    box.style.transform = 'scale(.7)'; box.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 280);
+  };
+
+  function highlightZones(type) {
+    document.querySelectorAll('.drop-zone').forEach(z => {
+      z.style.opacity = z.dataset.accept === type ? '1' : '0.45';
+    });
+  }
+  function clearZoneHighlights() {
+    document.querySelectorAll('.drop-zone').forEach(z => { z.style.opacity = ''; z.classList.remove('drag-over-ok','drag-over-wrong'); });
+  }
+
+  const LONG_PRESS_MS = 120;
+  let touchLongTimer = null, touchStartX = 0, touchStartY = 0, touchDragging = false;
+
+  document.querySelectorAll('.drag-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      if(card.classList.contains('placed')) { e.preventDefault(); return; }
+      dragId = card.dataset.id; dragType = card.dataset.type;
+      card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'copy';
+      highlightZones(dragType);
+    });
+    card.addEventListener('dragend', () => { card.classList.remove('dragging'); clearZoneHighlights(); });
+
+    card.addEventListener('touchstart', e => {
+      if(card.classList.contains('placed')) return;
+      const t = e.touches[0]; touchStartX = t.clientX; touchStartY = t.clientY; touchDragging = false;
+      touchLongTimer = setTimeout(() => {
+        touchDragging = true; touchCard = card; dragId = card.dataset.id; dragType = card.dataset.type;
+        if(navigator.vibrate) navigator.vibrate(30);
+        card.classList.add('touch-grabbing');
+        const rect = card.getBoundingClientRect();
+        touchClone = card.cloneNode(true);
+        touchClone.style.cssText = ['position:fixed','z-index:99999','pointer-events:none',`width:${rect.width}px`,`height:${rect.height}px`,`top:${rect.top}px`,`left:${rect.left}px`,'transition:none','box-shadow:0 12px 36px rgba(0,0,0,.35)','transform:scale(1.1)','opacity:.92','border-radius:10px'].join(';');
+        document.body.appendChild(touchClone);
+        card.classList.add('dragging'); highlightZones(dragType);
+      }, LONG_PRESS_MS);
+    }, {passive:true});
+
+    card.addEventListener('touchmove', e => {
+      const t = e.touches[0]; const dx = t.clientX - touchStartX; const dy = t.clientY - touchStartY;
+      if(!touchDragging) { if(Math.abs(dx) > 8 || Math.abs(dy) > 8) { clearTimeout(touchLongTimer); touchLongTimer = null; } return; }
+      e.preventDefault();
+      if(!touchClone || !touchCard) return;
+      const rect = touchCard.getBoundingClientRect();
+      touchClone.style.top = (t.clientY - rect.height / 2) + 'px';
+      touchClone.style.left = (t.clientX - rect.width / 2) + 'px';
+      touchClone.style.display = 'none';
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      touchClone.style.display = '';
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('drag-over-ok','drag-over-wrong'));
+      const zone = el && el.closest('.drop-zone');
+      if(zone) zone.classList.add(zone.dataset.accept === dragType ? 'drag-over-ok' : 'drag-over-wrong');
+    }, {passive:false});
+
+    card.addEventListener('touchend', e => {
+      clearTimeout(touchLongTimer); touchLongTimer = null;
+      if(!touchDragging || !touchClone || !touchCard) { touchDragging = false; return; }
+      const t = e.changedTouches[0];
+      touchClone.style.display = 'none';
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      touchClone.style.display = '';
+      const zone = el && el.closest('.drop-zone');
+      if(zone) drop(zone);
+      touchClone.remove(); touchClone = null;
+      touchCard.classList.remove('dragging','touch-grabbing'); touchCard = null;
+      clearZoneHighlights(); touchDragging = false; dragId = null; dragType = null;
+    });
+
+    card.addEventListener('touchcancel', () => {
+      clearTimeout(touchLongTimer); touchLongTimer = null;
+      if(touchClone) { touchClone.remove(); touchClone = null; }
+      if(touchCard) { touchCard.classList.remove('dragging','touch-grabbing'); touchCard = null; }
+      clearZoneHighlights(); touchDragging = false; dragId = null; dragType = null;
+    });
+  });
+
+  document.querySelectorAll('.drop-zone').forEach(zone => {
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      if(zone.dataset.accept === dragType) { zone.classList.add('drag-over-ok'); zone.classList.remove('drag-over-wrong'); }
+      else { zone.classList.add('drag-over-wrong'); zone.classList.remove('drag-over-ok'); }
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over-ok','drag-over-wrong'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over-ok','drag-over-wrong'); drop(zone); });
+  });
+
+  function showToastBenar(zone) {
+    const a = new Audio('https://denicendrianto41.github.io/benar.wav'); a.play().catch(()=>{});
+    const toast = document.createElement('div');
+    toast.innerHTML = '✅ Kamu Benar!';
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.6);background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;font-family:Space Grotesk,sans-serif;font-size:22px;font-weight:700;padding:16px 32px;border-radius:16px;box-shadow:0 8px 32px rgba(220,38,38,0.4);z-index:9999;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);';
+    document.body.appendChild(toast);
+    requestAnimationFrame(()=>{ toast.style.opacity='1'; toast.style.transform='translate(-50%,-50%) scale(1)'; });
+    setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translate(-50%,-50%) scale(0.8)'; setTimeout(()=>toast.remove(),300); }, 1400);
+    if(zone) { zone.style.borderColor='#dc2626'; zone.style.boxShadow='0 0 0 4px rgba(220,38,38,0.3)'; setTimeout(()=>{ zone.style.borderColor=''; zone.style.boxShadow=''; }, 1600); }
+  }
+  function showToastSalah(zone) {
+    const a = new Audio('https://denicendrianto41.github.io/salah.wav'); a.play().catch(()=>{});
+    if(zone) { zone.style.borderColor='#ef4444'; zone.style.boxShadow='0 0 0 4px rgba(239,68,68,0.3)'; zone.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(0)'}],{duration:320,easing:'ease-in-out'}); setTimeout(()=>{ zone.style.borderColor=''; zone.style.boxShadow=''; }, 800); }
+    const toast = document.createElement('div');
+    toast.innerHTML = '❌ Salah! Coba lagi.';
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.6);background:linear-gradient(135deg,#7f1d1d,#b91c1c);color:#fff;font-family:Space Grotesk,sans-serif;font-size:22px;font-weight:700;padding:16px 32px;border-radius:16px;box-shadow:0 8px 32px rgba(127,29,29,0.4);z-index:9999;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);';
+    document.body.appendChild(toast);
+    requestAnimationFrame(()=>{ toast.style.opacity='1'; toast.style.transform='translate(-50%,-50%) scale(1)'; });
+    setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translate(-50%,-50%) scale(0.8)'; setTimeout(()=>toast.remove(),300); }, 1400);
+  }
+
+  function drop(zone) {
+    if(!dragId) return;
+    const src = document.querySelector(`.drag-card[data-id="${dragId}"]`);
+    if(!src || src.classList.contains('placed')) { dragId=null; dragType=null; return; }
+    const isCorrect = zone.dataset.accept === dragType;
+    if(!isCorrect) {
+      zone.classList.add('anim-wrong');
+      zone.addEventListener('animationend', () => zone.classList.remove('anim-wrong'), {once:true});
+      showToastSalah(zone);
+      const hint = zone.querySelector('.drop-hint'); if(hint) hint.remove();
+      const dcW = document.createElement('div');
+      dcW.className = 'drop-card wrong-card'; dcW.dataset.id = dragId;
+      dcW.innerHTML = `<span class="drop-card-icon">${src.querySelector('.drag-icon').innerHTML}</span><span>${src.querySelector('.drag-name').innerHTML}</span><span style="margin-left:3px;font-size:11px;">⚠️</span><button class="drop-card-remove">&#x2715;</button>`;
+      const zIdW = zone.id;
+      dcW.querySelector('.drop-card-remove').addEventListener('click', () => { dcW.remove(); src.classList.remove('placed'); const z = document.getElementById(zIdW); if(!z.querySelector('.drop-card')) z.innerHTML = `<div class="drop-hint">← Drag ${zIdW==='dropAlat'?'alat':'bahan'} ke sini</div>`; updateCatatan(); });
+      zone.appendChild(dcW); src.classList.add('placed'); updateCatatan();
+      dragId = null; dragType = null; return;
+    }
+    const hint = zone.querySelector('.drop-hint'); if(hint) hint.remove();
+    const isBahan = dragType === 'bahan';
+    const dc = document.createElement('div');
+    dc.className = 'drop-card' + (isBahan ? ' bahan-card' : '') + ' anim-correct'; dc.dataset.id = dragId;
+    dc.innerHTML = `<span class="drop-card-icon">${src.querySelector('.drag-icon').innerHTML}</span><span>${src.querySelector('.drag-name').innerHTML}</span><button class="drop-card-remove">&#x2715;</button>`;
+    const zoneId = zone.id;
+    dc.querySelector('.drop-card-remove').addEventListener('click', () => { dc.remove(); src.classList.remove('placed'); const z = document.getElementById(zoneId); if(!z.querySelector('.drop-card')) z.innerHTML = `<div class="drop-hint">← Drag ${zoneId==='dropAlat'?'alat':'bahan'} ke sini</div>`; updateCatatan(); });
+    dc.addEventListener('animationend', () => dc.classList.remove('anim-correct'), {once:true});
+    zone.appendChild(dc); src.classList.add('placed');
+    showToastBenar(zone); updateCatatan();
+    dragId = null; dragType = null;
+  }
+
+  const CORRECT_ALAT  = new Set(['slide','pipet','tusuk','mikroskop','cotton']);
+  const CORRECT_BAHAN = new Set(['antia','antib','antid','darah','saline']);
+  const ALL_CORRECT   = new Set([...CORRECT_ALAT, ...CORRECT_BAHAN]);
+
+  function updateCatatan() {
+    const all = [...document.querySelectorAll('.drop-card')].map(d => d.dataset.id);
+    const box = document.getElementById('catatanMeja'); const txt = document.getElementById('catatanText');
+    if(all.length === 0) { box.style.display='none'; return; }
+    txt.innerHTML = all.map(id => NOTES[id]).filter(Boolean).join(' ');
+    box.style.display = 'block';
+    const correctCards = [...document.querySelectorAll('.drop-card:not(.wrong-card)')].map(d => d.dataset.id);
+    const wrongCards   = [...document.querySelectorAll('.drop-card.wrong-card')].map(d => d.dataset.id);
+    const correctSet   = new Set(correctCards);
+    const allOk = wrongCards.length === 0 && ALL_CORRECT.size === correctSet.size && [...ALL_CORRECT].every(id => correctSet.has(id));
+    if(allOk) setTimeout(showCelebration2, 400);
+  }
+
+  let confettiRAF2 = null;
+  function launchConfetti2() {
+    const canvas = document.getElementById('confettiCanvas2');
+    const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const colors = ['#dc2626','#ef4444','#f87171','#fca5a5','#fecaca','#fbbf24','#34d399','#60a5fa','#a78bfa','#fff'];
+    const pieces = Array.from({length:200}, () => ({ x:Math.random()*canvas.width, y:Math.random()*-canvas.height*.6, w:5+Math.random()*12, h:3+Math.random()*6, r:Math.random()*Math.PI*2, dr:(Math.random()-.5)*.18, dy:2+Math.random()*4.5, dx:(Math.random()-.5)*2.5, col:colors[Math.floor(Math.random()*colors.length)], opacity:1, shape:Math.random()>.6?'circle':'rect' }));
+    let startTime = null;
+    function draw(ts) {
+      if(!startTime) startTime = ts; const elapsed = ts - startTime; ctx.clearRect(0,0,canvas.width,canvas.height);
+      pieces.forEach(p => { p.y+=p.dy; p.x+=p.dx; p.r+=p.dr; if(elapsed>2500) p.opacity=Math.max(0,p.opacity-.015); ctx.save(); ctx.globalAlpha=p.opacity; ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.col; if(p.shape==='circle'){ctx.beginPath();ctx.arc(0,0,p.w/2,0,Math.PI*2);ctx.fill();}else{ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);} ctx.restore(); });
+      if(elapsed<5000) confettiRAF2=requestAnimationFrame(draw); else ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+    confettiRAF2 = requestAnimationFrame(draw);
+  }
+  function launchStars2() {
+    const container = document.getElementById('celebStars2'); if(!container) return; container.innerHTML='';
+    const emojis = ['⭐','🌟','✨','💫','🎊','🎉','🩸','💉','🏅','💎'];
+    for(let i=0;i<22;i++){
+      const s=document.createElement('div'); const em=emojis[Math.floor(Math.random()*emojis.length)]; const left=5+Math.random()*90; const delay=Math.random()*2.5; const dur=1.8+Math.random()*1.5; const size=14+Math.floor(Math.random()*22);
+      s.textContent=em; s.style.cssText=`position:absolute;left:${left}%;bottom:${10+Math.random()*60}%;font-size:${size}px;animation:starFloat2 ${dur}s ease-out ${delay}s both;pointer-events:none;`;
+      container.appendChild(s);
+    }
+    setTimeout(()=>{if(container) container.innerHTML='';}, 5500);
+  }
+  function showCelebration2() {
+    const audio=new Audio('https://denicendrianto41.github.io/berhasil.wav'); audio.play().catch(()=>{});
+    const overlay=document.getElementById('celebOverlay2'); const box=document.getElementById('celebBox2');
+    overlay.style.display='flex'; overlay.style.pointerEvents='auto';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ box.style.transform='scale(1) translateY(0)'; box.style.opacity='1'; }));
+    setTimeout(()=>{ const b=document.getElementById('celebBadge2'); if(b){b.style.opacity='1';b.style.transform='scale(1)';} },500);
+    setTimeout(()=>{ const t=document.getElementById('celebTitle2'); if(t){t.style.opacity='1';t.style.transform='translateY(0)';} },650);
+    setTimeout(()=>{ const s=document.getElementById('celebSub2'); if(s){s.style.opacity='1';s.style.transform='translateY(0)';} },800);
+    setTimeout(()=>{ const st=document.getElementById('celebStats2'); if(st){st.style.opacity='1';} },950);
+    launchStars2(); launchConfetti2();
+  }
+  window.closeCelebration2 = function() {
+    if(confettiRAF2){cancelAnimationFrame(confettiRAF2);confettiRAF2=null;}
+    const overlay=document.getElementById('celebOverlay2'); const box=document.getElementById('celebBox2');
+    const canvas=document.getElementById('confettiCanvas2'); const stars=document.getElementById('celebStars2');
+    box.style.transform='scale(.5) translateY(60px)'; box.style.opacity='0';
+    if(canvas){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);}
+    if(stars) stars.innerHTML='';
+    setTimeout(()=>{ overlay.style.display='none'; overlay.style.pointerEvents='none'; const b=document.getElementById('celebBadge2'); const t=document.getElementById('celebTitle2'); const s=document.getElementById('celebSub2'); const st=document.getElementById('celebStats2'); if(b){b.style.opacity='0';b.style.transform='scale(.6)';} if(t){t.style.opacity='0';t.style.transform='translateY(10px)';} if(s){s.style.opacity='0';s.style.transform='translateY(8px)';} if(st){st.style.opacity='0';} }, 400);
+  };
+  window.resetMeja = function() {
+    closeCelebration2();
+    document.getElementById('dropAlat').innerHTML = '<div class="drop-hint">← Drag alat ke sini</div>';
+    document.getElementById('dropBahan').innerHTML = '<div class="drop-hint">← Drag bahan ke sini</div>';
+    document.querySelectorAll('.drag-card').forEach(c=>c.classList.remove('placed'));
+    document.getElementById('catatanMeja').style.display='none';
+  };
+})();
+</script>
+
+<!-- ===== PROSEDUR ===== -->
+<div id="page-prosedur" class="page">
+  <div style="flex:1;overflow:hidden;padding:8px 12px 8px;display:flex;flex-direction:column;gap:7px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;flex:1;min-height:0;">
+      <div class="card" style="margin-bottom:0;overflow-y:auto;">
+        <div class="ch" style="margin-bottom:5px;"><div class="ci r">📋</div><div class="ct">Langkah Percobaan</div></div>
+        <div id="bloodSteps"></div>
+      </div>
+      <div class="card" style="margin-bottom:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+        <div>
+          <div class="ch" style="margin-bottom:5px;"><div class="ci r">⚠️</div><div class="ct" style="color:var(--red)">Perhatikan!</div></div>
+          <ul class="olist" style="font-size:11px;">
+            <li>Gunakan <strong>lancet steril</strong> sekali pakai — jangan berbagi dengan orang lain</li>
+            <li>Bersihkan ujung jari dengan <strong>alkohol 70%</strong> sebelum penusukan</li>
+            <li>Gunakan <strong>pipet terpisah</strong> untuk setiap serum (Anti-A, Anti-B, Anti-D)</li>
+            <li>Amati reaksi dalam <strong>2–3 menit</strong> — miringkan slide perlahan untuk melihat gumpalan</li>
+            <li>Catat hasil: <strong>aglutinasi (+)</strong> atau <strong>tidak aglutinasi (−)</strong></li>
+          </ul>
+        </div>
+        <div class="notebox">
+          <div class="nt">💡 Membaca Hasil</div>
+          <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px;">
+            <div style="display:flex;gap:8px;font-size:11.5px;color:#92400e;align-items:center;"><span>🔴</span><span>Gumpalan merah (aglutinasi) → <strong>Antigen ada</strong></span></div>
+            <div style="display:flex;gap:8px;font-size:11.5px;color:#92400e;align-items:center;"><span>✅</span><span>Tetap cair, merata → <strong>Tidak ada antigen</strong></span></div>
+            <div style="display:flex;gap:8px;font-size:11.5px;color:#92400e;align-items:center;"><span>🔬</span><span>Gunakan lup/mikroskop jika ragu</span></div>
+          </div>
+        </div>
+        <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:10px 14px;">
+          <div style="font-size:10px;font-weight:700;color:#b91c1c;letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;">🩸 Interpretasi Hasil Uji</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #fecaca44;">
+              <span style="background:#fee2e2;color:#b91c1c;border-radius:4px;padding:1px 6px;font-weight:700;font-size:11px;min-width:22px;text-align:center;flex-shrink:0;">A</span>
+              <span style="font-size:12px;color:var(--text2);">Anti-A: (+) · Anti-B: (−) · Anti-D: ±</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #fecaca44;">
+              <span style="background:#dbeafe;color:#1d4ed8;border-radius:4px;padding:1px 6px;font-weight:700;font-size:11px;min-width:22px;text-align:center;flex-shrink:0;">B</span>
+              <span style="font-size:12px;color:var(--text2);">Anti-A: (−) · Anti-B: (+) · Anti-D: ±</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;padding:3px 0;border-bottom:1px solid #fecaca44;">
+              <span style="background:#ede9fe;color:#6d28d9;border-radius:4px;padding:1px 6px;font-weight:700;font-size:11px;min-width:22px;text-align:center;flex-shrink:0;">AB</span>
+              <span style="font-size:12px;color:var(--text2);">Anti-A: (+) · Anti-B: (+) · Anti-D: ±</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;padding:3px 0;">
+              <span style="background:#d1fae5;color:#047857;border-radius:4px;padding:1px 6px;font-weight:700;font-size:11px;min-width:22px;text-align:center;flex-shrink:0;">O</span>
+              <span style="font-size:12px;color:var(--text2);">Anti-A: (−) · Anti-B: (−) · Anti-D: ±</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const bloodStepsData = [
+  {icon:'https://denicendrianto41.github.io/pipet.png', text:'Siapkan <strong>slide kaca bersih</strong>. Bagi menjadi 3 area dan beri label: Anti-A, Anti-B, dan Anti-D.'},
+  {icon:'https://denicendrianto41.github.io/hcl.png', text:'Teteskan masing-masing <strong>1 tetes serum</strong> Anti-A, Anti-B, dan Anti-D pada area yang sesuai di slide kaca.'},
+  {icon:'https://denicendrianto41.github.io/korek.png', text:'Bersihkan ujung jari manis dengan <strong>kapas alkohol 70%</strong>. Tusuk dengan lancet steril. Buang tetes darah pertama.'},
+  {icon:'https://denicendrianto41.github.io/hati.png', text:'Teteskan <strong>1 tetes darah</strong> ke masing-masing area serum pada slide kaca. Gunakan ujung lancet atau toothpick terpisah.'},
+  {icon:'https://denicendrianto41.github.io/tabung_reaksi.png', text:'Campur darah dengan serum menggunakan <strong>pengaduk/toothpick berbeda</strong> untuk tiap area. Aduk merata.'},
+  {icon:'https://denicendrianto41.github.io/tabung_reaksi.png', text:'Diamkan selama <strong>2–3 menit</strong>. Miringkan slide perlahan dan amati apakah terjadi <strong>aglutinasi (penggumpalan)</strong>.'},
+  {icon:'https://denicendrianto41.github.io/tabung_reaksi.png', text:'Catat hasil: tanda <strong>(+)</strong> jika terjadi aglutinasi dan <strong>(−)</strong> jika tidak. Tentukan golongan darah ABO dan Rhesus.'},
+];
+(function(){
+  const colors=['#dc2626','#991b1b','#b91c1c','#1d4ed8','#7c3aed','#059669','#d97706'];
+  document.getElementById('bloodSteps').innerHTML=`<div style="position:relative;padding:4px 0;">${bloodStepsData.map((s,i)=>{
+    const c=colors[i%colors.length],nc=colors[(i+1)%colors.length],last=i===bloodStepsData.length-1,right=i%2===0;
+    return `<div style="display:flex;align-items:flex-start;gap:0;margin-bottom:0;position:relative;" class="map-step">
+      ${right?`
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;z-index:1;margin-right:10px;">
+        <button onclick="zoomBloodStep(this)" style="width:40px;height:40px;border-radius:50%;background:${c};border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px ${c}55;flex-shrink:0;cursor:pointer;padding:4px;transition:transform .15s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
+          <img src="${s.icon}" style="width:24px;height:24px;object-fit:contain;pointer-events:none;filter:brightness(0) invert(1);">
+        </button>
+        ${!last?`<div style="width:0;flex:1;min-height:14px;border-left:3px dashed ${nc}88;margin-top:3px;margin-bottom:3px;"></div>`:''}
+      </div>
+      <div style="flex:1;background:${c}10;border:1.5px solid ${c}40;border-radius:10px;padding:6px 10px;position:relative;margin-bottom:0;" class="step-box">
+        <div style="position:absolute;left:-8px;top:12px;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-right:8px solid ${c}40;"></div>
+        <div style="font-size:8.5px;font-weight:700;color:${c};letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;">Langkah ${i+1}</div>
+        <p style="font-size:11.5px;color:var(--text2);margin:0;line-height:1.5;">${s.text}</p>
+      </div>`:`
+      <div style="flex:1;background:${c}10;border:1.5px solid ${c}40;border-radius:10px;padding:6px 10px;position:relative;margin-bottom:0;" class="step-box">
+        <div style="position:absolute;right:-8px;top:12px;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:8px solid ${c}40;"></div>
+        <div style="font-size:8.5px;font-weight:700;color:${c};letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;">Langkah ${i+1}</div>
+        <p style="font-size:11.5px;color:var(--text2);margin:0;line-height:1.5;">${s.text}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;z-index:1;margin-left:10px;">
+        <button onclick="zoomBloodStep(this)" style="width:40px;height:40px;border-radius:50%;background:${c};border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px ${c}55;flex-shrink:0;cursor:pointer;padding:4px;transition:transform .15s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
+          <img src="${s.icon}" style="width:24px;height:24px;object-fit:contain;pointer-events:none;filter:brightness(0) invert(1);">
+        </button>
+        ${!last?`<div style="width:0;flex:1;min-height:14px;border-left:3px dashed ${nc}88;margin-top:3px;margin-bottom:3px;"></div>`:''}
+      </div>`}
+    </div>`;
+  }).join('')}</div>`;
+})();
+function zoomBloodStep(btn){
+  const sfx=document.getElementById('clickSfx'); if(sfx){sfx.currentTime=0;sfx.play().catch(()=>{});}
+  const row=btn.closest('.map-step'); if(!row) return;
+  const box=row.querySelector('.step-box'); if(!box) return;
+  box.classList.remove('step-box-zoom'); void box.offsetWidth; box.classList.add('step-box-zoom');
+  box.addEventListener('animationend',()=>box.classList.remove('step-box-zoom'),{once:true});
+}
+</script>
+
+<!-- ===== SIMULASI ===== -->
+<div id="page-simulasi" class="page">
+  <div style="flex:1;overflow-y:auto;padding:8px 14px 14px;">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1a0505,#7f1d1d,#dc2626);border-radius:12px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
+      <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:20px;">🩸</div>
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(13px,1.6vw,17px);font-weight:800;color:#fff;">Simulasi Uji Golongan Darah</div>
+        <div style="font-size:11px;color:#fecaca;margin-top:2px;">Pilih golongan darah → Tambahkan serum → Amati reaksi aglutinasi</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:240px 1fr;gap:10px;">
+      <!-- Control Panel -->
+      <div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:10px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:#b91c1c;">Pengaturan Sampel</div>
+
+        <div>
+          <div style="font-size:9.5px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;">Golongan Darah</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;" id="bloodTypeBtns">
+            <button onclick="selectBloodType('A')" class="bt-btn" id="btA" style="padding:8px 4px;border-radius:7px;border:2px solid #fecaca;background:#fff5f5;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:#dc2626;cursor:pointer;transition:all .17s;">A</button>
+            <button onclick="selectBloodType('B')" class="bt-btn" id="btB" style="padding:8px 4px;border-radius:7px;border:2px solid #bfdbfe;background:#eff6ff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:#1d4ed8;cursor:pointer;transition:all .17s;">B</button>
+            <button onclick="selectBloodType('AB')" class="bt-btn" id="btAB" style="padding:8px 4px;border-radius:7px;border:2px solid #ddd6fe;background:#f5f3ff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:#7c3aed;cursor:pointer;transition:all .17s;">AB</button>
+            <button onclick="selectBloodType('O')" class="bt-btn" id="btO" style="padding:8px 4px;border-radius:7px;border:2px solid #bbf7d0;background:#f0fdf4;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;color:#059669;cursor:pointer;transition:all .17s;">O</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:9.5px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;">Rhesus</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+            <button onclick="selectRhesus('+')" id="rhPos" style="padding:7px 4px;border-radius:7px;border:2px solid #fecaca;background:#fff5f5;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#dc2626;cursor:pointer;transition:all .17s;">Rh+ (D+)</button>
+            <button onclick="selectRhesus('-')" id="rhNeg" style="padding:7px 4px;border-radius:7px;border:2px solid #e2e8f0;background:#f8fafc;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#475569;cursor:pointer;transition:all .17s;">Rh− (D−)</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:9.5px;font-weight:600;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;">Tambahkan Serum</div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <button onclick="addSerum('antiA')" style="padding:7px;border-radius:6px;border:none;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><span>🔴</span> Teteskan Anti-A</button>
+            <button onclick="addSerum('antiB')" style="padding:7px;border-radius:6px;border:none;background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><span>🔵</span> Teteskan Anti-B</button>
+            <button onclick="addSerum('antiD')" style="padding:7px;border-radius:6px;border:none;background:linear-gradient(135deg,#475569,#64748b);color:#fff;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;"><span>⬜</span> Teteskan Anti-D</button>
+          </div>
+        </div>
+
+        <button onclick="resetSimulation()" style="padding:7px;border-radius:6px;border:1px solid var(--border);background:var(--surf2);color:var(--text2);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">↺ Reset Simulasi</button>
+
+        <!-- Legend -->
+        <div style="background:#f8fafc;border:1px solid var(--border);border-radius:7px;padding:8px;">
+          <div style="font-size:9px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Legenda</div>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2);"><div style="width:12px;height:12px;border-radius:3px;background:#dc2626;flex-shrink:0;"></div>Aglutinasi (+)</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2);"><div style="width:12px;height:12px;border-radius:3px;background:#dbeafe;border:1px solid #93c5fd;flex-shrink:0;"></div>Tidak aglutinasi (−)</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2);"><div style="width:12px;height:12px;border-radius:3px;background:#f1f5f9;border:1px dashed #94a3b8;flex-shrink:0;"></div>Belum ditambahkan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main simulation area -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <!-- Slide visualization -->
+        <div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:14px;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:#b91c1c;margin-bottom:12px;display:flex;align-items:center;gap:6px;">🔬 Slide Kaca – Uji Aglutinasi</div>
+          <div style="display:flex;gap:20px;justify-content:center;align-items:flex-end;flex-wrap:wrap;">
+
+            <!-- Circle Anti-A -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div id="circleAntiA" style="width:90px;height:90px;border-radius:50%;border:3px solid #fecaca;background:#f8fafc;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .4s ease;">
+                <div id="clumpA" style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 40%,#ef4444,#991b1b);opacity:0;transition:opacity .6s ease;"></div>
+                <div id="bloodDropA" style="position:absolute;inset:0;border-radius:50%;background:rgba(220,38,38,0.15);opacity:0;transition:opacity .5s ease;"></div>
+                <span style="font-size:10px;font-weight:600;color:#94a3b8;z-index:2;position:relative;" id="labelA">Anti-A</span>
+              </div>
+              <div id="resultA" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;">—</div>
+              <div style="font-size:9px;color:#64748b;">Serum Anti-A</div>
+            </div>
+
+            <!-- Circle Anti-B -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div id="circleAntiB" style="width:90px;height:90px;border-radius:50%;border:3px solid #bfdbfe;background:#f8fafc;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .4s ease;">
+                <div id="clumpB" style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 40%,#ef4444,#991b1b);opacity:0;transition:opacity .6s ease;"></div>
+                <div id="bloodDropB" style="position:absolute;inset:0;border-radius:50%;background:rgba(220,38,38,0.15);opacity:0;transition:opacity .5s ease;"></div>
+                <span style="font-size:10px;font-weight:600;color:#94a3b8;z-index:2;position:relative;" id="labelB">Anti-B</span>
+              </div>
+              <div id="resultB" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;">—</div>
+              <div style="font-size:9px;color:#64748b;">Serum Anti-B</div>
+            </div>
+
+            <!-- Circle Anti-D -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div id="circleAntiD" style="width:90px;height:90px;border-radius:50%;border:3px solid #e2e8f0;background:#f8fafc;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:all .4s ease;">
+                <div id="clumpD" style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 40% 40%,#ef4444,#991b1b);opacity:0;transition:opacity .6s ease;"></div>
+                <div id="bloodDropD" style="position:absolute;inset:0;border-radius:50%;background:rgba(220,38,38,0.15);opacity:0;transition:opacity .5s ease;"></div>
+                <span style="font-size:10px;font-weight:600;color:#94a3b8;z-index:2;position:relative;" id="labelD">Anti-D</span>
+              </div>
+              <div id="resultD" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;">—</div>
+              <div style="font-size:9px;color:#64748b;">Serum Anti-D (Rh)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result display -->
+        <div id="resultCard" style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:14px;display:none;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:#b91c1c;margin-bottom:10px;">📊 Kesimpulan Golongan Darah</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Golongan Darah</div>
+              <div id="finalBloodType" style="font-family:'Space Grotesk',sans-serif;font-size:52px;font-weight:800;color:#dc2626;line-height:1;">—</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div id="summaryAntiA" style="font-size:11px;color:var(--text2);background:#f8fafc;border-radius:6px;padding:5px 9px;">Anti-A: —</div>
+              <div id="summaryAntiB" style="font-size:11px;color:var(--text2);background:#f8fafc;border-radius:6px;padding:5px 9px;">Anti-B: —</div>
+              <div id="summaryAntiD" style="font-size:11px;color:var(--text2);background:#f8fafc;border-radius:6px;padding:5px 9px;">Anti-D: —</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Observation table -->
+        <div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:12px;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:#b91c1c;margin-bottom:8px;">📋 Tabel Pengamatan</div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:11px;">
+              <thead><tr style="background:#fff5f5;">
+                <th style="padding:6px 10px;border:1px solid #fecaca;color:#b91c1c;text-align:left;">Serum</th>
+                <th style="padding:6px 10px;border:1px solid #fecaca;color:#b91c1c;text-align:left;">Antibodi</th>
+                <th style="padding:6px 10px;border:1px solid #fecaca;color:#b91c1c;text-align:center;">Hasil</th>
+                <th style="padding:6px 10px;border:1px solid #fecaca;color:#b91c1c;text-align:left;">Interpretasi</th>
+              </tr></thead>
+              <tbody id="obsTableBody">
+                <tr><td style="padding:5px 10px;border:1px solid #fee2e2;color:#dc2626;font-weight:600;">🔴 Anti-A</td><td style="padding:5px 10px;border:1px solid #fee2e2;">Anti-A</td><td style="padding:5px 10px;border:1px solid #fee2e2;text-align:center;" id="obsA">—</td><td style="padding:5px 10px;border:1px solid #fee2e2;" id="interA">Belum diuji</td></tr>
+                <tr style="background:#f8fafc;"><td style="padding:5px 10px;border:1px solid #fee2e2;color:#1d4ed8;font-weight:600;">🔵 Anti-B</td><td style="padding:5px 10px;border:1px solid #fee2e2;">Anti-B</td><td style="padding:5px 10px;border:1px solid #fee2e2;text-align:center;" id="obsB">—</td><td style="padding:5px 10px;border:1px solid #fee2e2;" id="interB">Belum diuji</td></tr>
+                <tr><td style="padding:5px 10px;border:1px solid #fee2e2;color:#475569;font-weight:600;">⬜ Anti-D</td><td style="padding:5px 10px;border:1px solid #fee2e2;">Anti-D</td><td style="padding:5px 10px;border:1px solid #fee2e2;text-align:center;" id="obsD">—</td><td style="padding:5px 10px;border:1px solid #fee2e2;" id="interD">Belum diuji</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === SIMULASI STATE ===
+let simState = { bloodType: null, rhesus: null, antiA: false, antiB: false, antiD: false };
+
+const BLOOD_ANTIGENS = { A:{hasA:true,hasB:false}, B:{hasA:false,hasB:true}, AB:{hasA:true,hasB:true}, O:{hasA:false,hasB:false} };
+
+function selectBloodType(type) {
+  simState.bloodType = type;
+  simState.antiA = false; simState.antiB = false; simState.antiD = false;
+  document.querySelectorAll('.bt-btn').forEach(b => b.style.outline = 'none');
+  const btn = document.getElementById('bt'+type);
+  if(btn) btn.style.outline = '3px solid #dc2626';
+  resetCircles();
+  showNotifSim('🩸 Golongan darah ' + type + ' dipilih. Sekarang tambahkan serum!');
+}
+
+function selectRhesus(rh) {
+  simState.rhesus = rh; simState.antiD = false;
+  document.getElementById('rhPos').style.outline = rh==='+' ? '3px solid #dc2626' : 'none';
+  document.getElementById('rhNeg').style.outline = rh==='-' ? '3px solid #475569' : 'none';
+  resetCircle('D');
+  showNotifSim('Rhesus ' + (rh==='+' ? 'Positif (D+)' : 'Negatif (D−)') + ' dipilih');
+}
+
+function resetCircles() {
+  ['A','B','D'].forEach(resetCircle);
+  document.getElementById('resultCard').style.display = 'none';
+  ['obsA','obsB','obsD'].forEach(id => document.getElementById(id).textContent = '—');
+  ['interA','interB','interD'].forEach(id => document.getElementById(id).textContent = 'Belum diuji');
+}
+
+function resetCircle(letter) {
+  const circle = document.getElementById('circleAnti'+letter);
+  const clump = document.getElementById('clump'+letter);
+  const drop = document.getElementById('bloodDrop'+letter);
+  const result = document.getElementById('result'+letter);
+  const label = document.getElementById('label'+letter);
+  if(circle) { circle.style.border = letter==='A'?'3px solid #fecaca':letter==='B'?'3px solid #bfdbfe':'3px solid #e2e8f0'; circle.style.background='#f8fafc'; }
+  if(clump) clump.style.opacity='0';
+  if(drop) drop.style.opacity='0';
+  if(result) { result.style.background='#f1f5f9'; result.style.color='#94a3b8'; result.style.border='1px solid #e2e8f0'; result.textContent='—'; }
+  if(label) { label.style.color='#94a3b8'; label.textContent='Anti-'+letter; }
+}
+
+function addSerum(type) {
+  if(!simState.bloodType) { showNotifSim('⚠️ Pilih golongan darah terlebih dahulu!'); return; }
+  if(type==='antiD' && !simState.rhesus) { showNotifSim('⚠️ Pilih Rhesus terlebih dahulu!'); return; }
+
+  const letter = type==='antiA'?'A':type==='antiB'?'B':'D';
+  const drop = document.getElementById('bloodDrop'+letter);
+  if(drop) { drop.style.opacity='1'; }
+
+  setTimeout(() => {
+    let agglutinated = false;
+    if(type==='antiA') { agglutinated = BLOOD_ANTIGENS[simState.bloodType].hasA; simState.antiA = true; }
+    else if(type==='antiB') { agglutinated = BLOOD_ANTIGENS[simState.bloodType].hasB; simState.antiB = true; }
+    else if(type==='antiD') { agglutinated = simState.rhesus==='+'; simState.antiD = true; }
+
+    showAgglutination(letter, agglutinated);
+    updateObsTable(letter, agglutinated);
+    checkAndShowResult();
+  }, 600);
+}
+
+function showAgglutination(letter, agglutinated) {
+  const circle = document.getElementById('circleAnti'+letter);
+  const clump = document.getElementById('clump'+letter);
+  const result = document.getElementById('result'+letter);
+  const label = document.getElementById('label'+letter);
+  if(agglutinated) {
+    if(circle) { circle.style.border='3px solid #dc2626'; circle.style.background='#fee2e2'; }
+    if(clump) clump.style.opacity='1';
+    if(result) { result.style.background='#fee2e2'; result.style.color='#991b1b'; result.style.border='1px solid #fca5a5'; result.textContent='AGLUTINASI (+)'; }
+    if(label) { label.style.color='#dc2626'; label.textContent='AGLUTINASI!'; }
+  } else {
+    if(circle) { circle.style.border='3px solid #86efac'; circle.style.background='#f0fdf4'; }
+    if(clump) clump.style.opacity='0';
+    if(result) { result.style.background='#f0fdf4'; result.style.color='#166534'; result.style.border='1px solid #86efac'; result.textContent='Tidak (+)'; }
+    if(label) { label.style.color='#166534'; label.textContent='Tidak aglutinasi'; }
+  }
+}
+
+function updateObsTable(letter, agglutinated) {
+  const obsEl = document.getElementById('obs'+letter);
+  const interEl = document.getElementById('inter'+letter);
+  if(obsEl) obsEl.innerHTML = agglutinated ? '<strong style="color:#dc2626;">+</strong>' : '<strong style="color:#166534;">−</strong>';
+  if(interEl) {
+    if(letter==='A') interEl.textContent = agglutinated ? 'Eritrosit memiliki antigen A' : 'Tidak ada antigen A';
+    else if(letter==='B') interEl.textContent = agglutinated ? 'Eritrosit memiliki antigen B' : 'Tidak ada antigen B';
+    else interEl.textContent = agglutinated ? 'Rhesus Positif (ada antigen D)' : 'Rhesus Negatif (tidak ada antigen D)';
+  }
+}
+
+function checkAndShowResult() {
+  if(!simState.antiA || !simState.antiB || !simState.antiD) return;
+  const card = document.getElementById('resultCard'); if(!card) return;
+  card.style.display = 'block';
+  const finalEl = document.getElementById('finalBloodType');
+  const rh = simState.rhesus==='+' ? '+' : '−';
+  const bt = simState.bloodType || '?';
+  if(finalEl) { finalEl.textContent = bt + rh; finalEl.style.color = bt==='A'?'#dc2626':bt==='B'?'#1d4ed8':bt==='AB'?'#7c3aed':'#059669'; }
+  const agA = BLOOD_ANTIGENS[simState.bloodType].hasA, agB = BLOOD_ANTIGENS[simState.bloodType].hasB, agD = simState.rhesus==='+';
+  document.getElementById('summaryAntiA').innerHTML = `<strong style="color:#dc2626;">Anti-A:</strong> ${agA?'<span style="color:#dc2626;font-weight:700;">Aglutinasi (+)</span>':'<span style="color:#166534;font-weight:700;">Tidak aglutinasi (−)</span>'}`;
+  document.getElementById('summaryAntiB').innerHTML = `<strong style="color:#1d4ed8;">Anti-B:</strong> ${agB?'<span style="color:#dc2626;font-weight:700;">Aglutinasi (+)</span>':'<span style="color:#166534;font-weight:700;">Tidak aglutinasi (−)</span>'}`;
+  document.getElementById('summaryAntiD').innerHTML = `<strong style="color:#475569;">Anti-D:</strong> ${agD?'<span style="color:#dc2626;font-weight:700;">Aglutinasi (+) → Rh+</span>':'<span style="color:#166534;font-weight:700;">Tidak aglutinasi (−) → Rh−</span>'}`;
+
+  // Play success sound
+  const audio = new Audio('https://denicendrianto41.github.io/tring.wav'); audio.play().catch(()=>{});
+  showNotifSim('✅ Hasil: Golongan Darah ' + bt + rh);
+}
+
+function resetSimulation() {
+  simState = { bloodType:null, rhesus:null, antiA:false, antiB:false, antiD:false };
+  document.querySelectorAll('.bt-btn').forEach(b=>b.style.outline='none');
+  document.getElementById('rhPos').style.outline='none';
+  document.getElementById('rhNeg').style.outline='none';
+  resetCircles();
+  showNotifSim('↺ Simulasi direset');
+}
+
+let notifTimer2 = null;
+function showNotifSim(msg) {
+  let el = document.getElementById('notifSim');
+  if(!el) { el = document.createElement('div'); el.id='notifSim'; el.style.cssText='position:fixed;bottom:14px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a0505;color:#fff;padding:7px 18px;border-radius:18px;font-size:11px;font-weight:600;z-index:2000;transition:transform .3s ease;pointer-events:none;'; document.body.appendChild(el); }
+  el.textContent=msg; el.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(notifTimer2); notifTimer2=setTimeout(()=>{ el.style.transform='translateX(-50%) translateY(60px)'; }, 2600);
+}
+</script>
+
+<!-- ===== DISKUSI ===== -->
+<div id="page-evaluasi" class="page">
+  <div style="flex:1;overflow:hidden;padding:8px 12px 8px;display:flex;flex-direction:column;gap:6px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.1vw,12px);letter-spacing:.12em;color:var(--acc);text-transform:uppercase;">Pertanyaan Diskusi</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(16px,2vw,20px);font-weight:700;color:var(--acc3);">Diskusi <span style="color:var(--acc2)">Hasil Percobaan</span></div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="btn-qnav btn-reset-q" onclick="clearDQ()" style="border:1px solid var(--border);font-size:11px;padding:5px 12px;">↺ Hapus Jawaban</button>
+        <button onclick="printDiskusi()" style="display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;padding:5px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(220,38,38,0.25);transition:all .17s;" onmouseover="this.style.boxShadow='0 4px 14px rgba(220,38,38,0.4)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(220,38,38,0.25)'">🖨️ Cetak / Download PDF</button>
+      </div>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:6px;min-height:0;">
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;background:rgba(220,38,38,.1);">1</div><div class="ct" style="font-size:clamp(12px,1.3vw,14px);">Apa yang dimaksud aglutinasi? Mengapa reaksi ini terjadi saat serum Anti-A ditambahkan ke sampel darah golongan A?</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(1,this.value)" id="dq1" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;background:rgba(220,38,38,.1);">2</div><div class="ct" style="font-size:clamp(12px,1.3vw,14px);">Mengapa golongan darah O disebut donor universal? Jelaskan hubungannya dengan antigen dan antibodi yang dimiliki!</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(2,this.value)" id="dq2" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;background:rgba(220,38,38,.1);">3</div><div class="ct" style="font-size:clamp(12px,1.3vw,14px);">Jelaskan mekanisme eritroblastosis fetalis! Mengapa kondisi ini terjadi pada kehamilan kedua ibu Rh− yang mengandung bayi Rh+?</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(3,this.value)" id="dq3" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;background:rgba(220,38,38,.1);">4</div><div class="ct" style="font-size:clamp(12px,1.3vw,14px);">Jika seorang pasien hanya bereaksi positif terhadap Anti-B dan Anti-D, tentukan golongan darahnya dan jelaskan genotip kemungkinannya!</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(4,this.value)" id="dq4" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+      <div class="card" style="margin-bottom:0;display:flex;flex-direction:column;grid-column:span 2;">
+        <div class="ch" style="margin-bottom:4px;"><div class="ci b" style="min-width:22px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;background:rgba(220,38,38,.1);">5</div><div class="ct" style="font-size:clamp(12px,1.3vw,14px);">Seorang anak berdarah O. Apakah mungkin kedua orang tuanya berdarah AB? Jelaskan berdasarkan hukum Mendel dan kode genetika golongan darah ABO!</div></div>
+        <textarea class="disc-area" placeholder="Jawaban..." oninput="saveDQ(5,this.value)" id="dq5" style="flex:1;resize:none;margin-top:0;min-height:0;"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// NAV
+function toggleNav(){document.getElementById('mainNav').classList.toggle('open');}
+function closeNav(){document.getElementById('mainNav').classList.remove('open');}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('nav')&&!e.target.closest('#menuToggle')) closeNav();
+});
+function show(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// DISKUSI
+function saveDQ(n,val){try{localStorage.setItem('dq_darah_'+n,val);}catch(e){}}
+function clearDQ(){
+  for(let i=1;i<=5;i++){
+    try{localStorage.removeItem('dq_darah_'+i);}catch(e){}
+    const el=document.getElementById('dq'+i); if(el) el.value='';
+  }
+}
+function printDiskusi(){
+  const questions=['Apa yang dimaksud aglutinasi? Mengapa reaksi ini terjadi saat serum Anti-A ditambahkan ke sampel darah golongan A?','Mengapa golongan darah O disebut donor universal? Jelaskan hubungannya dengan antigen dan antibodi yang dimiliki!','Jelaskan mekanisme eritroblastosis fetalis! Mengapa kondisi ini terjadi pada kehamilan kedua ibu Rh− yang mengandung bayi Rh+?','Jika seorang pasien hanya bereaksi positif terhadap Anti-B dan Anti-D, tentukan golongan darahnya dan jelaskan genotip kemungkinannya!','Seorang anak berdarah O. Apakah mungkin kedua orang tuanya berdarah AB? Jelaskan berdasarkan hukum Mendel dan kode genetika golongan darah ABO!'];
+  const answers=[];
+  for(let i=1;i<=5;i++){const el=document.getElementById('dq'+i); answers.push(el?el.value.trim():'');}
+  const now=new Date(); const tgl=now.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const rows=questions.map((q,i)=>`<div class="row"><div class="qnum">${i+1}</div><div class="qbody"><div class="qtxt">${q}</div><div class="atxt">${answers[i]||'<em style="color:#94a3b8;">Belum diisi</em>'}</div></div></div>`).join('');
+  const html=`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Diskusi – Lab Virtual Golongan Darah</title><style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap');*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',sans-serif;background:#fff;color:#1e293b;padding:36px 44px;font-size:13px;}.header{border-bottom:3px solid #dc2626;padding-bottom:14px;margin-bottom:20px;}.lab-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#b91c1c;margin-bottom:3px;}.lab-sub{font-size:11px;color:#64748b;letter-spacing:.06em;text-transform:uppercase;}.meta{margin-top:8px;font-size:12px;color:#475569;}.section-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:#b91c1c;margin-bottom:12px;letter-spacing:.02em;text-transform:uppercase;}.row{display:flex;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #e2e8f0;}.row:last-child{border-bottom:none;}.qnum{min-width:28px;height:28px;border-radius:8px;background:#fee2e2;color:#b91c1c;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}.qbody{flex:1;}.qtxt{font-weight:600;color:#1e293b;margin-bottom:6px;line-height:1.5;}.atxt{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 12px;min-height:52px;line-height:1.7;color:#334155;white-space:pre-wrap;}.footer{margin-top:28px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10.5px;color:#94a3b8;text-align:center;}@media print{body{padding:20px 28px;}@page{margin:1.5cm;size:A4 portrait;}}</style></head><body><div class="header"><div class="lab-title">🩸 Lab Virtual – Uji Golongan Darah ABO & Rhesus</div><div class="lab-sub">Pertanyaan Diskusi Hasil Percobaan</div><div class="meta">📅 Dicetak pada: ${tgl}</div></div><div class="section-title">Jawaban Diskusi</div>${rows}<div class="footer">Lab Maya Biologi · Dicetak dari aplikasi Lab Virtual Golongan Darah</div><script>window.onload=function(){window.print();}<\/script></body></html>`;
+  const w=window.open('','_blank','width=900,height=700'); if(w){w.document.write(html);w.document.close();}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  for(let i=1;i<=5;i++){
+    try{const v=localStorage.getItem('dq_darah_'+i);const el=document.getElementById('dq'+i);if(v&&el)el.value=v;}catch(e){}
+  }
+});
+</script>
+</body>
+</html>
